@@ -1,0 +1,164 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int map[13][13]; //체스팜
+int Cmap[13][13]; //말들이 있는 곳
+
+int dx[5] = {0, 0,0,-1,1 };
+int dy[5] = {0, 1,-1,0,0 };
+
+struct pon {
+	int x;
+	int y;
+	int d;
+	int index;
+};
+
+int pt[11];
+int child[11];
+
+void Init(int n) {
+	for (int i = 1; i <= n; i++) {
+		pt[i] = i;
+		child[i] = i;
+	}
+	return;
+}
+
+int Find(int p) {
+	while (pt[p] != p) {
+		p = pt[p];
+	}
+	return p;
+}
+
+int Depth(int p) {
+	int d = 1;
+	while (true) {
+		if (pt[p] != p) {
+			d++;
+			p = pt[p];
+		}
+		else break;
+		
+	}
+	return d;
+}
+
+void Union(int p, int q) { //p는 자식, q는 부모, 부모가 자식 밑으로 가야 함
+	int j = Find(q);
+	pt[j] = p;
+	child[p] = j;
+}
+
+void Reverse(int p) {
+	int d = Depth(p);
+	int j, k , pre; //i는 다음거 k는 그 다음거
+	for (int i = 0; i < d; i++) {
+		if (i == 0) {
+			pre = p; //원래 값 저장
+			j = pt[pre]; //j는 기존의 부모 저장
+			child[pre] = j; //자식은 원래의 부모
+			pt[pre] = pre; //바닥에 있는 놈을 루트로
+		}
+		else {
+			k = pt[j]; //j의 원래 부모
+			child[j] = k;
+			pt[j] = pre; //j의 부모를 pre로 저장
+			pre = j;
+			j = k;
+		}
+	}
+}
+
+void ChangeDir(pon &i) {
+	switch (i.d)
+	{
+	case 1:
+		i.d = 2;
+		break;
+	case 2:
+		i.d = 1;
+		break;
+	case 3:
+		i.d = 4;
+		break;
+	case 4:
+		i.d = 3;
+	default:
+		break;
+	}
+	return;
+}
+
+vector<pon> chess(11);
+
+int main() {
+	int n, k;
+	cin >> n >> k;
+	Init(k);
+	vector<queue<pon>> st(k + 1);
+	for (int i = 1; i <= n; i++) { //0은 흰색, 1은 빨강색, 2는 파란색
+		for (int j = 1; j <= n; j++) {
+			cin >> map[i][j];
+		}
+	}
+	for (int i = 1; i <= k; i++) {
+		int x, y, d;
+		cin >> x >> y >> d;
+		Cmap[x][y] = i;
+		chess[i] = { x,y,d,i };
+	}
+	int con = 0;
+	while (true) {
+		con++;
+		if (con > 1000) {
+			cout << -1 << endl;
+			return 0;
+		}
+		for (int i = 1; i <= k; i++) {
+			int nx = chess[i].x + dx[chess[i].d];
+			int ny = chess[i].y + dy[chess[i].d];
+			if (map[nx][ny] == 2 || nx<1 || nx>n || ny<1 || ny>n) { //다음 칸이 파란색이거나 범위를 벗어나면 방향 바꿔주기
+				ChangeDir(chess[i]); //방향 반대로 바꾸고
+				nx = chess[i].x + dx[chess[i].d];
+				ny = chess[i].y + dy[chess[i].d];
+			}
+			int now = i; //바닥에 몇번째가 있는지
+			if (map[nx][ny] != 2 && nx >= 1 && nx <= n && ny >= 1 && ny <= n) {//이동시키기
+				if (child[now] != now) {
+					pt[child[now]] = child[now];
+					child[now] = now;
+				}
+				if (Cmap[chess[i].x][chess[i].y] == now) { //움직이는 놈이 바닥이면 원래 있던 곳 비어주기
+					Cmap[chess[i].x][chess[i].y] = 0;
+				}
+				if (map[nx][ny] == 1) { //빨간 색이면 뒤집기
+					now = Find(i); //뒤집으면 맨 위가 바닥이니까
+					Reverse(i);
+				}
+				if (Cmap[nx][ny] != 0) { //이동하는 곳에 말이 있다면
+					Union(now, Cmap[nx][ny]); //올려주기
+					if (Depth(Cmap[nx][ny]) >= 4) {
+						cout << con << endl;
+						return 0;
+					}
+				}
+				//올려주는거 끝나면 말 위치 바꿔주기
+				int p = now,d=Depth(now);
+				chess[p].x = nx; chess[p].y = ny;
+				for (int j = 0; j < d; j++) {
+					chess[p].x = nx; chess[p].y = ny;
+					p = pt[p];
+				}
+				//이동 다 했으면
+				if (Cmap[nx][ny] == 0) {
+					Cmap[nx][ny] = now;
+				}
+			}
+		}
+	}
+	return 0;
+}
