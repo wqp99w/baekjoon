@@ -27,6 +27,17 @@ public class Main{
         que.isEmpty();
         que.size();
 
+        Deque<pos> dq = new ArrayDeque<>();
+        dq.addLast(new pos(1,2));
+        dq.addFirst(new pos(2,3));
+        dq.peekLast();
+        dq.peekFirst();
+        dq.pollLast();
+        dq.pollFirst();
+        dq.isEmpty();
+        dq.size();
+
+
         PriorityQueue<pos> pq = new PriorityQueue<>((a,b) -> {
             // 같은 경우에는 y의 값이 큰 놈이 앞으로 -> b.y - a.y 일때, b가 크면 양수고 a가 크면 음수로 나올텐데
             // compare(a,b)가 여기서 실행되는데 여기서 음수면 a가 b보다 우선순위가 높음 -> 앞에옴
@@ -56,9 +67,14 @@ public class Main{
         set.isEmpty();
         set.size();
 
-        pos[] poss = new pos[6];
-        Arrays.sort(poss, (a,b)->{
-            if(a.x == b.x ) return a.y - b.y;
+        Integer[] arr = new Integer[3];
+        Arrays.fill(arr, 1);
+        Arrays.sort(arr, (a,b) -> {
+            return b - a;
+        });
+        pos[] poss = new pos[5];
+        Arrays.sort(poss, (a,b) ->{
+            if(a.x == b.x) return a.y - b.y;
             return a.x - b.x;
         });
     }
