@@ -2,7 +2,6 @@ import java.io.*;
 import java.util.*;
 public class Main {
 
-
     public static class edge implements Comparable<edge>{
         int e;
         int w;
